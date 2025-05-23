@@ -141,7 +141,7 @@ void SBookMarkToolTab::LoadBookMarkDataAsset()
 	if (Bookmarks == nullptr)
 	{
 		UEditorDialogLibrary::ShowMessage(
-		FText::FromString("警告"),
+		FText::FromString(TEXT("警告")),
 		FText::FromString(TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset资源不存在")),
 		EAppMsgType::OkCancel
 		);
