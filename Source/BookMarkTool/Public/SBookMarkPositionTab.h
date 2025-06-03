@@ -11,10 +11,10 @@ struct FAssetBookmarksContainer;
 /**
  * 
  */
-class BOOKMARKTOOL_API SBookMarkToolTab : public SCompoundWidget
+class BOOKMARKTOOL_API SBookMarkPositionTab : public SCompoundWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SBookMarkToolTab)
+	SLATE_BEGIN_ARGS(SBookMarkPositionTab)
 	{}
 	SLATE_END_ARGS()
 
@@ -23,7 +23,7 @@ public:
 	void RefreshAllListView();
 	
 private:
-	UBookMarkDataAsset* Bookmarks;
+	TWeakObjectPtr<UBookMarkDataAsset> Bookmarks;
 	TArray<TSharedPtr<FFoldPathBookmarksContainer>> StoredFoldPath;
 	TArray<TSharedPtr<FAssetBookmarksContainer>> StoredAssetData;
 

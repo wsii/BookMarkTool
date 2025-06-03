@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SBookMarkToolTab.h"
+#include "SBookMarkPositionTab.h"
 #include "SlateOptMacros.h"
 #include "BookMarkDataAsset.h"
 #include "ContentBrowserModule.h"
@@ -12,128 +12,149 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SBookMarkToolTab::Construct(const FArguments& InArgs)
+void SBookMarkPositionTab::Construct(const FArguments& InArgs)
 {
 	FSlateFontInfo FontInfo = GetFontSytle();
 	FontInfo.Size = 12;
 	//加载数据资产
 	LoadBookMarkDataAsset();
-	
+
+	FTextKey LLOCTEXT_NAMESPACE;
 	ChildSlot
 	[
-		// main slot
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(SButton)
-			.ContentPadding(FMargin(4.0, 2.0))
-			.Text(FText::FromString(TEXT("打开配置资产")))
-			.OnClicked(this, &SBookMarkToolTab::OpenSettingDataAsset)
-		]
-
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SNew(SHorizontalBox)
-			// 左侧分隔线
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0f)
-			.Padding(5.0f, 0.0f) // 文字与分隔线的间距
-			[
-				SNew(SSeparator)
-				.Thickness(1.0f)
-			]
-			// 中间文字
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(STextBlock)
-				.Text(FText::FromString(TEXT("资产(Shift打开)")))
-				.Margin(5.0f)
-				.Font(FontInfo)
-			]
-			// 右侧分隔线
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0f)
-			.Padding(5.0f, 0.0f)
-			[
-				SNew(SSeparator)
-				.Thickness(1.0f)
-			]
-		]
-		//AssetList
-		+ SVerticalBox::Slot()
+		SNew(SBox)
+		.MaxDesiredWidth(1600.0f)
+		.MaxDesiredHeight(200.0f)
+		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
 		[
-			SNew(SScrollBox)
-			+ SScrollBox::Slot()
+			SNew(SOverlay)
+			+SOverlay::Slot()
+			.HAlign(HAlign_Fill)
+			.VAlign(VAlign_Fill)
+			.Padding(5.0f)
 			[
-				ConstructAssetListView()	
-			]
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			// SNew(SSeparator)
-			// .Thickness(2.0f) // 线宽
-			// .Orientation(Orient_Vertical) // 设置为垂直方向
-			SNew(SHorizontalBox)
-			// 左侧分隔线
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0f)
-			.Padding(5.0f, 0.0f) // 文字与分隔线的间距
-			[
-				SNew(SSeparator)
-				.Thickness(1.0f)
-			]
-			// 中间文字
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			[
-				SNew(STextBlock)
-				.Text(FText::FromString(TEXT("文件夹")))
-				.Font(FontInfo)
-				.Margin(5.0f)
-			]
-			// 右侧分隔线
-			+ SHorizontalBox::Slot()
-			.FillWidth(1.0f)
-			.Padding(5.0f, 0.0f)
-			[
-				SNew(SSeparator)
-				.Thickness(1.0f)
-			]
-		]
+				// main slot
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				[
+					SNew(SButton)
+					.ContentPadding(FMargin(4.0, 2.0))
+					.Text(FText::FromString(TEXT("打开配置资产")))
+					.OnClicked(this, &SBookMarkPositionTab::OpenSettingDataAsset)
+				]
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				[
+					// SNew(SSeparator)
+					// .Thickness(2.0f) // 线宽
+					// .Orientation(Orient_Vertical) // 设置为垂直方向
+					SNew(SHorizontalBox)
+					// 左侧分隔线
+					+ SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					.Padding(5.0f, 0.0f) // 文字与分隔线的间距
+					[
+						SNew(SSeparator)
+						.Thickness(1.0f)
+					]
+					// 中间文字
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					[
+						SNew(STextBlock)
+						.Text(FText::FromString(TEXT("世界位置")))
+						.Font(FontInfo)
+						.Margin(5.0f)
+					]
+					// 右侧分隔线
+					+ SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					.Padding(5.0f, 0.0f)
+					[
+						SNew(SSeparator)
+						.Thickness(1.0f)
+					]
+				]
 
-		// FoldList
-		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Fill)
-		[
-			SNew(SScrollBox)
-			+ SScrollBox::Slot()
-			[
-				ConstructFoldPathListView()
+				// FoldList
+				+ SVerticalBox::Slot()
+				.VAlign(VAlign_Fill)
+				[
+					SNew(SScrollBox)
+					+ SScrollBox::Slot()
+					[
+						ConstructFoldPathListView()
+					]
+				]
 			]
+			+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Bottom) // 将按钮固定到底部
+				.Padding(5.0f)
+				[
+					SNew(SBox)
+					.HeightOverride(50.0f)
+					[
+						SNew(SHorizontalBox)
+						// + SHorizontalBox::Slot()
+						// .HAlign(HAlign_Left)
+						// .VAlign(VAlign_Fill)
+						// [
+						// 	SNew(STextBlock)
+						// 	.Text(FText::FromString(TEXT("位置名称")))
+						// ]
+						+ SHorizontalBox::Slot()
+						.HAlign(HAlign_Fill)
+						.VAlign(VAlign_Fill)
+						[
+							SNew(SEditableTextBox)
+						  // .Text(LOCTEXT("DefaultText", "Enter text here..."))  // 设置默认文本
+						  .HintText(LOCTEXT("HintText", "请输入要保存的坐标名称")) // 设置提示文本
+						  // .OnTextChanged(this, &SMyWidget::HandleTextChanged) // 文本变化回调
+						  // .OnTextCommitted(this, &SMyWidget::HandleTextCommitted) // 文本提交回调
+						  .Font(FAppStyle::GetFontStyle("NormalFont")) // 设置字体
+						  .SelectAllTextWhenFocused(true) // 获取焦点时全选文本
+						  .ClearKeyboardFocusOnCommit(false) // 提交后是否保持焦点
+							
+						]
+						+ SHorizontalBox::Slot()
+						.HAlign(HAlign_Fill)
+						.VAlign(VAlign_Fill)
+						[
+							SNew(SButton)
+							.HAlign(HAlign_Center)
+							.VAlign(VAlign_Center)
+							.OnClicked(this, &SBookMarkPositionTab::OpenSettingDataAsset)
+							.ButtonStyle(FAppStyle::Get(),"FlatButton.Success")
+							.Content()
+							[
+								SNew(STextBlock)
+								.Text(FText::FromString(TEXT("添加位置")))
+							]
+						]
+					]
+				]
 		]
+		
 	];
 	
 }
 
-TSharedRef<SListView<TSharedPtr<FFoldPathBookmarksContainer>>> SBookMarkToolTab::ConstructFoldPathListView()
+TSharedRef<SListView<TSharedPtr<FFoldPathBookmarksContainer>>> SBookMarkPositionTab::ConstructFoldPathListView()
 {
 	FoldPathListView =
 	SNew(SListView<TSharedPtr<FFoldPathBookmarksContainer>>)
-	.ItemHeight(24.f)
 	.SelectionMode(ESelectionMode::Single) // 单选
 	.ListItemsSource(&StoredFoldPath) // this is a TArray of above TSharedPtr<FAssetData>
-	.OnGenerateRow(this, &SBookMarkToolTab::OnGenerateRowForFoldPathList)
-	.OnMouseButtonClick(this,&SBookMarkToolTab::OnPathCRowWidgetClicked);;
+	.OnGenerateRow(this, &SBookMarkPositionTab::OnGenerateRowForFoldPathList)
+	.OnMouseButtonClick(this,&SBookMarkPositionTab::OnPathCRowWidgetClicked);;
 	// A Pointer can convert to be a ref.
 	return FoldPathListView.ToSharedRef();
 }
 
-void SBookMarkToolTab::LoadBookMarkDataAsset()
+void SBookMarkPositionTab::LoadBookMarkDataAsset()
 {
 	//加载资源
 	Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
@@ -156,7 +177,7 @@ void SBookMarkToolTab::LoadBookMarkDataAsset()
 	GetStoredAssetData();
 }
 
-TSharedRef<ITableRow> SBookMarkToolTab::OnGenerateRowForFoldPathList(TSharedPtr<FFoldPathBookmarksContainer> FoldPathDataToDisplay,
+TSharedRef<ITableRow> SBookMarkPositionTab::OnGenerateRowForFoldPathList(TSharedPtr<FFoldPathBookmarksContainer> FoldPathDataToDisplay,
                                                                      const TSharedRef<STableViewBase>& OwnerTable)
 {
 	//check,  in case to return a None ptr
@@ -211,24 +232,23 @@ TSharedRef<ITableRow> SBookMarkToolTab::OnGenerateRowForFoldPathList(TSharedPtr<
 }
 
 
-TSharedRef<SListView<TSharedPtr<FAssetBookmarksContainer>>> SBookMarkToolTab::ConstructAssetListView()
+TSharedRef<SListView<TSharedPtr<FAssetBookmarksContainer>>> SBookMarkPositionTab::ConstructAssetListView()
 {
 	AssetListView =
 	SNew(SListView<TSharedPtr<FAssetBookmarksContainer>>)
-	.ItemHeight(24.f)
 	.SelectionMode(ESelectionMode::Single)
 	.ListItemsSource(&StoredAssetData) // this is a TArray of above TSharedPtr<FAssetData>
-	.OnGenerateRow(this, &SBookMarkToolTab::OnGenerateRowForAssetList)
-	.OnMouseButtonClick(this,&SBookMarkToolTab::OnAssetRowWidgetClicked);
+	.OnGenerateRow(this, &SBookMarkPositionTab::OnGenerateRowForAssetList)
+	.OnMouseButtonClick(this,&SBookMarkPositionTab::OnAssetRowWidgetClicked);
 	// A Pointer can convert to be a ref.
 	return AssetListView.ToSharedRef();
 }
 
-void SBookMarkToolTab::RefreshAllListView()
+void SBookMarkPositionTab::RefreshAllListView()
 {
-	if (Bookmarks)
+	if (Bookmarks.Get())
 	{
-		UEditorAssetLibrary::SaveLoadedAsset(Bookmarks);
+		UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
 		Bookmarks->ClearGarbage();
 		Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
 
@@ -240,7 +260,7 @@ void SBookMarkToolTab::RefreshAllListView()
 	FoldPathListView->RebuildList();
 }
 
-TSharedRef<ITableRow> SBookMarkToolTab::OnGenerateRowForAssetList(
+TSharedRef<ITableRow> SBookMarkPositionTab::OnGenerateRowForAssetList(
 	TSharedPtr<FAssetBookmarksContainer> AssetDataToDisplay, const TSharedRef<STableViewBase>& OwnerTable)
 {
 	//check,  in case to return a None ptr
@@ -304,7 +324,7 @@ TSharedRef<ITableRow> SBookMarkToolTab::OnGenerateRowForAssetList(
 	return ListViewRowWidget;
 }
 
-TSharedRef<STextBlock> SBookMarkToolTab::ConstructTextBlock(const FString& TextContent, const FSlateFontInfo& FontToUse)
+TSharedRef<STextBlock> SBookMarkPositionTab::ConstructTextBlock(const FString& TextContent, const FSlateFontInfo& FontToUse)
 {
 	TSharedRef<STextBlock> ConstructTextBlock =
 	SNew(STextBlock)
@@ -315,7 +335,7 @@ TSharedRef<STextBlock> SBookMarkToolTab::ConstructTextBlock(const FString& TextC
 	return ConstructTextBlock;
 }
 
-TSharedRef<STextBlock> SBookMarkToolTab::ConstructAssetTextBlock(const FString& TextContent,
+TSharedRef<STextBlock> SBookMarkPositionTab::ConstructAssetTextBlock(const FString& TextContent,
 	const FSlateFontInfo& FontToUse)
 {
 	FAssetData AssetData = IAssetRegistry::Get()->GetAssetByObjectPath(TextContent);
@@ -330,28 +350,28 @@ TSharedRef<STextBlock> SBookMarkToolTab::ConstructAssetTextBlock(const FString& 
 	return ConstructTextBlock;
 }
 
-TSharedRef<SButton> SBookMarkToolTab::ConstructPathButton(const TSharedPtr<FFoldPathBookmarksContainer>& AssetDataToDisplay)
+TSharedRef<SButton> SBookMarkPositionTab::ConstructPathButton(const TSharedPtr<FFoldPathBookmarksContainer>& AssetDataToDisplay)
 {
 	TSharedRef<SButton> Button =
 	SNew(SButton)
 	.Text(FText::FromString(TEXT("Delete")))
-	.OnClicked(this, &SBookMarkToolTab::OnDeletePathButtonClicked,AssetDataToDisplay);
+	.OnClicked(this, &SBookMarkPositionTab::OnDeletePathButtonClicked,AssetDataToDisplay);
 
 	return Button;
 }
 
-TSharedRef<SButton> SBookMarkToolTab::ConstructAssetButton(
+TSharedRef<SButton> SBookMarkPositionTab::ConstructAssetButton(
 	const TSharedPtr<FAssetBookmarksContainer>& AssetDataToDisplay)
 {
 	TSharedRef<SButton> Button =
 	SNew(SButton)
 	.Text(FText::FromString(TEXT("Delete")))
-	.OnClicked(this, &SBookMarkToolTab::OnDeleteAssetButtonClicked,AssetDataToDisplay);
+	.OnClicked(this, &SBookMarkPositionTab::OnDeleteAssetButtonClicked,AssetDataToDisplay);
 
 	return Button;
 }
 
-void SBookMarkToolTab::OnPathCRowWidgetClicked(TSharedPtr<FFoldPathBookmarksContainer> ClickedData)
+void SBookMarkPositionTab::OnPathCRowWidgetClicked(TSharedPtr<FFoldPathBookmarksContainer> ClickedData)
 {
 	TArray<FString> AssetsPathToSync;
 
@@ -363,7 +383,7 @@ void SBookMarkToolTab::OnPathCRowWidgetClicked(TSharedPtr<FFoldPathBookmarksCont
 	ContentBrowserModule.Get().SyncBrowserToFolders( AssetsPathToSync, false, true );
 }
 
-void SBookMarkToolTab::OnAssetRowWidgetClicked(TSharedPtr<FAssetBookmarksContainer> ClickedData)
+void SBookMarkPositionTab::OnAssetRowWidgetClicked(TSharedPtr<FAssetBookmarksContainer> ClickedData)
 {
 	TArray<FString> AssetsPathToSync;
 
@@ -382,7 +402,7 @@ void SBookMarkToolTab::OnAssetRowWidgetClicked(TSharedPtr<FAssetBookmarksContain
 	
 }
 
-void SBookMarkToolTab::GetStoredFoldPath()
+void SBookMarkPositionTab::GetStoredFoldPath()
 {
 	StoredFoldPath.Empty();
 	if (Bookmarks != nullptr && Bookmarks->FoldPathList.Num()>0)
@@ -399,7 +419,7 @@ void SBookMarkToolTab::GetStoredFoldPath()
 	}
 }
 
-void SBookMarkToolTab::GetStoredAssetData()
+void SBookMarkPositionTab::GetStoredAssetData()
 {
 	StoredAssetData.Empty();
 	if (Bookmarks != nullptr &&Bookmarks->AssetList.Num()>0)
@@ -414,21 +434,21 @@ void SBookMarkToolTab::GetStoredAssetData()
 	}
 }
 
-FReply SBookMarkToolTab::OpenSettingDataAsset()
+FReply SBookMarkPositionTab::OpenSettingDataAsset()
 {
 
-	if (Bookmarks)
+	if (Bookmarks.Get())
 	{
-		GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(Bookmarks);
+		GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(Bookmarks.Get());
 	}
 	return FReply::Handled();
 }
 
-FReply SBookMarkToolTab::OnDeletePathButtonClicked(TSharedPtr<FFoldPathBookmarksContainer> ClickedData)
+FReply SBookMarkPositionTab::OnDeletePathButtonClicked(TSharedPtr<FFoldPathBookmarksContainer> ClickedData)
 {
 	if (StoredFoldPath.Contains(ClickedData))
 	{
-		if (Bookmarks)
+		if (Bookmarks.Get())
 		{
 			Bookmarks->Modify();
 			Bookmarks->FoldPathList.RemoveAt(StoredFoldPath.Find(ClickedData));
@@ -441,11 +461,11 @@ FReply SBookMarkToolTab::OnDeletePathButtonClicked(TSharedPtr<FFoldPathBookmarks
 	return FReply::Handled();
 }
 
-FReply SBookMarkToolTab::OnDeleteAssetButtonClicked(TSharedPtr<FAssetBookmarksContainer> ClickedData)
+FReply SBookMarkPositionTab::OnDeleteAssetButtonClicked(TSharedPtr<FAssetBookmarksContainer> ClickedData)
 {
 	if (StoredAssetData.Contains(ClickedData))
 	{
-		if (Bookmarks)
+		if (Bookmarks.Get())
 		{
 			Bookmarks->Modify();
 			Bookmarks->AssetList.RemoveAt(StoredAssetData.Find(ClickedData));

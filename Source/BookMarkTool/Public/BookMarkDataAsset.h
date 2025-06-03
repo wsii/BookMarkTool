@@ -6,21 +6,6 @@
 #include "Engine/DataAsset.h"
 #include "BookMarkDataAsset.generated.h"
 
-
-// USTRUCT(BlueprintType)
-// struct FLevelBookmarksContainer
-// {
-// 	GENERATED_BODY()
-//
-// public:
-// 	UPROPERTY(EditAnywhere)
-// 	FString Name;
-//
-// 	UPROPERTY(EditAnywhere, Category="", meta=(AllowedClasses="/Script/Engine.World"))
-// 	FSoftObjectPath MapPath;
-// 	
-// };
-
 USTRUCT(BlueprintType)
 struct FFoldPathBookmarksContainer
 {
@@ -36,12 +21,6 @@ public:
 
 };
 
-
-struct FFoldPathListElementHandle
-{
-	int32 index;
-};
-
 USTRUCT(BlueprintType)
 struct FAssetBookmarksContainer
 {
@@ -53,6 +32,23 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category="Asset",meta = (DisplayName = "Save Path"))
 	FSoftObjectPath Path;
+	
+};
+
+USTRUCT(BlueprintType)
+struct FPositionBookmarksContainer
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category="Position")
+	FString Name;
+
+	UPROPERTY(VisibleAnywhere, Category="Position",meta = (DisplayName = "World Positoin"))
+	FTransform WorldPosition;
+
+	UPROPERTY(VisibleAnywhere, Category="Position", meta=(AllowedClasses="/Script/Engine.World"))
+	FSoftObjectPath MapPath;
 	
 };
 /**
@@ -71,6 +67,9 @@ class BOOKMARKTOOL_API UBookMarkDataAsset : public UDataAsset
 	
 	UPROPERTY(EditAnywhere, Category="Path")
 	TArray<FFoldPathBookmarksContainer> FoldPathList;
+
+	UPROPERTY(EditAnywhere, Category="Position")
+	TArray<FPositionBookmarksContainer> WorldPositionList;
 	
 	UPROPERTY(VisibleAnywhere, Category="Collection")
 	TSet<FString> StorePath;
