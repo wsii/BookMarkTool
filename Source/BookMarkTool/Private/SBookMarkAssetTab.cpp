@@ -23,7 +23,7 @@ void SBookMarkAssetTab::Construct(const FArguments& InArgs)
 	[
 		SNew(SBox)
 		.MaxDesiredWidth(1600.0f)
-		.MaxDesiredHeight(300.0f)
+		.MaxDesiredHeight(200.0f)
 		.HAlign(HAlign_Fill)
 		.VAlign(VAlign_Fill)
 		[

@@ -6,8 +6,8 @@
 #include "Widgets/SCompoundWidget.h"
 
 class UBookMarkDataAsset;
-struct FFoldPathBookmarksContainer;
-struct FAssetBookmarksContainer;
+
+struct FPositionBookmarksContainer;
 /**
  * 
  */
@@ -23,42 +23,35 @@ public:
 	void RefreshAllListView();
 	
 private:
+	FString CurrentActorName;
 	TWeakObjectPtr<UBookMarkDataAsset> Bookmarks;
-	TArray<TSharedPtr<FFoldPathBookmarksContainer>> StoredFoldPath;
-	TArray<TSharedPtr<FAssetBookmarksContainer>> StoredAssetData;
-
-	TSharedPtr<SListView<TSharedPtr<FFoldPathBookmarksContainer>>> FoldPathListView;
-	TSharedRef<SListView<TSharedPtr<FFoldPathBookmarksContainer>>> ConstructFoldPathListView();
-	TSharedPtr<SListView<TSharedPtr<FAssetBookmarksContainer>>> AssetListView;
-	TSharedRef<SListView<TSharedPtr<FAssetBookmarksContainer>>> ConstructAssetListView();
+	TArray<TSharedPtr<FPositionBookmarksContainer>> StoredPosition;
 	
-	void LoadBookMarkDataAsset();
+	TSharedPtr<SListView<TSharedPtr<FPositionBookmarksContainer>>> PositionListView;
+	TSharedRef<SListView<TSharedPtr<FPositionBookmarksContainer>>> ConstructPositionListView();
 	
-	TSharedRef<ITableRow> OnGenerateRowForFoldPathList(TSharedPtr<FFoldPathBookmarksContainer> AssetDataToDisplay,
+	TSharedRef<ITableRow> OnGenerateRowForPositionList(TSharedPtr<FPositionBookmarksContainer> PositionDataToDisplay,
 											   const TSharedRef<STableViewBase>& OwnerTable);
-	TSharedRef<ITableRow> OnGenerateRowForAssetList(TSharedPtr<FAssetBookmarksContainer> AssetDataToDisplay,
-										   const TSharedRef<STableViewBase>& OwnerTable);
 	
-
-	TSharedRef<STextBlock> ConstructTextBlock(const FString& TextContent, const FSlateFontInfo& FontToUse);
-	TSharedRef<STextBlock> ConstructAssetTextBlock(const FString& TextContent, const FSlateFontInfo& FontToUse);
+	TSharedRef<STextBlock> ConstructNameTextBlock(const FString& TextContent, const FSlateFontInfo& FontToUse);
+	TSharedRef<STextBlock> ConstructPathTextBlock(const FString& TextContent, const FSlateFontInfo& FontToUse);
 	FSlateFontInfo GetFontSytle() const { return FCoreStyle::Get().GetFontStyle("EmbossedText"); }
 
-	TSharedRef<SButton> ConstructPathButton(const TSharedPtr<FFoldPathBookmarksContainer>& AssetDataToDisplay);
-	TSharedRef<SButton> ConstructAssetButton(const TSharedPtr<FAssetBookmarksContainer>& AssetDataToDisplay);
+	TSharedRef<SButton> ConstructPathButton(const TSharedPtr<FPositionBookmarksContainer>& PositionDataToDisplay);
 	
-	void OnPathCRowWidgetClicked(TSharedPtr<FFoldPathBookmarksContainer> ClickedData);
-	void OnAssetRowWidgetClicked(TSharedPtr<FAssetBookmarksContainer> ClickedData);
+	void OnPositionRowWidgetClicked(TSharedPtr<FPositionBookmarksContainer> ClickedData);
 	
-	void GetStoredFoldPath();
-	void GetStoredAssetData();
+	void LoadBookMarkDataAsset();
+	void GetStoredPosition();
 
+	
 	FReply OpenSettingDataAsset();
+	FReply AddPostion();
+	
+	FText CurrentText;
+	void HandleTextChanged(const FText& InText);
 
-	FReply OnDeletePathButtonClicked(TSharedPtr<FFoldPathBookmarksContainer> ClickedData);
-	FReply OnDeleteAssetButtonClicked(TSharedPtr<FAssetBookmarksContainer> ClickedData);
-	// FReply OnDeleteButtonClicked();
+	FReply OnDeletePositionButtonClicked(TSharedPtr<FPositionBookmarksContainer> ClickedData);
 
-	// TSharedRef<STextBlock> ConstructTextBlockForTabButton(const FString& content);
 
 };

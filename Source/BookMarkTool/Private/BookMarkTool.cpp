@@ -177,10 +177,10 @@ void FBookMarkToolModule::ExtendFolderContextMenu()
 
 void FBookMarkToolModule::AddFoldPath()
 {
-	TObjectPtr<UBookMarkDataAsset> BookmarkSettingsAsset;
+	TWeakObjectPtr<UBookMarkDataAsset> BookmarkSettingsAsset;
 	// // 加载 DataAsset
 	BookmarkSettingsAsset = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
-	if (!BookmarkSettingsAsset)
+	if (!BookmarkSettingsAsset.Get())
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load BookMarkDataAsset!"));
 		return;
@@ -189,8 +189,6 @@ void FBookMarkToolModule::AddFoldPath()
 	// 刷新缓存
 	BookmarkSettingsAsset->ReSetStorePath();
 	
-
-
 	BookmarkSettingsAsset->Modify();
 
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
@@ -244,7 +242,7 @@ void FBookMarkToolModule::AddFoldPath()
 	}
 
 	// 3. 保存
-	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(BookmarkSettingsAsset);
+	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(BookmarkSettingsAsset.Get());
 
 	if (!bSaved)
 	{
@@ -264,13 +262,13 @@ void FBookMarkToolModule::AddFoldPath()
 
 void FBookMarkToolModule::AddAssetPath()
 {
-	TObjectPtr<UBookMarkDataAsset> BookmarkSettingsAsset;
+	TWeakObjectPtr<UBookMarkDataAsset> BookmarkSettingsAsset;
 	// // 加载 DataAsset
 	BookmarkSettingsAsset = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
 	// 刷新缓存
 	BookmarkSettingsAsset->ReSetStorePath();
 	
-	if (!BookmarkSettingsAsset)
+	if (!BookmarkSettingsAsset.Get())
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed to load BookMarkDataAsset!"));
 		return;
@@ -313,7 +311,7 @@ void FBookMarkToolModule::AddAssetPath()
 	}
 
 	// 3. 保存
-	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(BookmarkSettingsAsset);
+	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(BookmarkSettingsAsset.Get());
 
 	if (!bSaved)
 	{
@@ -336,24 +334,21 @@ void FBookMarkToolModule::RegisterMenus()
 	{
 		UToolMenu* ToolbarMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.PlayToolBar");
 		{
-			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("Settings");
+			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("Settings",LOCTEXT("书签工具", "书签工具"));
 			{
-				// FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FBookMarkToolCommands::Get().OpenBookMarkTool));
-				// Entry.SetCommandList(PluginCommands);
-				FToolMenuEntry SlateOutEntry = FToolMenuEntry::InitComboButton(
-					"SlateOut",
-					FUIAction(
-						FExecuteAction(),
-						FIsActionChecked()
-						),
+
+				FToolMenuEntry BookMarkEntry = FToolMenuEntry::InitComboButton(
+					"BookMarkTool",
+					FUIAction(),
 					FOnGetContent::CreateRaw(this,&FBookMarkToolModule::GetDropdown),
-					LOCTEXT("SlateOut_Label", ""),
-					LOCTEXT("SlateOut_ToolTip", "Open SlateOut"),
+					LOCTEXT("BookMarkTool", "书签工具"),
+					LOCTEXT("BookMarkTool_Tooltip", "书签工具"),
 					FSlateIcon(FBookMarkToolStyle::GetStyleSetName(), "BookMarkTool.OpenBookMarkTool")
 				);
-				Section.AddEntry(SlateOutEntry);
-
-				UE_LOG(LogTemp,Log,TEXT("插件菜单注册完成。"));
+				//这句话一定要加，否则菜单按钮没文字
+				BookMarkEntry.StyleNameOverride = "CalloutToolbar";
+				Section.AddEntry(BookMarkEntry);
+				
 			}
 		}
 	}

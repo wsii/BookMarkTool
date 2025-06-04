@@ -69,7 +69,7 @@ class BOOKMARKTOOL_API UBookMarkDataAsset : public UDataAsset
 	TArray<FFoldPathBookmarksContainer> FoldPathList;
 
 	UPROPERTY(EditAnywhere, Category="Position")
-	TArray<FPositionBookmarksContainer> WorldPositionList;
+	TArray<FPositionBookmarksContainer> PositionList;
 	
 	UPROPERTY(VisibleAnywhere, Category="Collection")
 	TSet<FString> StorePath;
