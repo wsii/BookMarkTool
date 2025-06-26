@@ -15,10 +15,12 @@
 #include "ToolMenus.h"
 #include "SBookMarkAssetTab.h"
 #include "SBookMarkFolderTab.h"
+#include "SBookMarkMain.h"
 #include "SBookMarkPositionTab.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
+static const FName BookMarkMainTabName("BookMarkMain");
 static const FName BookMarkAssetTabName("BookMarkAsset");
 static const FName BookMarkFolderTabName("BookMarkFolder");
 static const FName BookMarkPositionTabName("BookMarkPosition");
@@ -36,12 +38,16 @@ void FBookMarkToolModule::StartupModule()
 	
 	PluginCommands = MakeShareable(new FUICommandList);
 
-	// PluginCommands->MapAction(
-	// 	FBookMarkToolCommands::Get().OpenBookMarkTool,
-	// 	FExecuteAction::CreateRaw(this, &FBookMarkToolModule::PluginButtonClicked),
-	// 	FCanExecuteAction());
+	PluginCommands->MapAction(
+		FBookMarkToolCommands::Get().OpenBookMarkTool,
+		FExecuteAction::CreateRaw(this, &FBookMarkToolModule::PluginButtonClicked),
+		FCanExecuteAction());
 
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FBookMarkToolModule::RegisterMenus));
+
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(BookMarkMainTabName, FOnSpawnTab::CreateRaw(this, &FBookMarkToolModule::OnSpawnPluginTab))
+	.SetDisplayName(LOCTEXT("FBookMarkToolTabTitle", "BookMarkMain"))
+	.SetMenuType(ETabSpawnerMenuType::Hidden);
 	
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(BookMarkAssetTabName, FOnSpawnTab::CreateRaw(this, &FBookMarkToolModule::OnSpawnAssetTab))
 		.SetDisplayName(LOCTEXT("FBookMarkToolTabTitle", "BookMarkAsset"))
@@ -71,9 +77,21 @@ void FBookMarkToolModule::ShutdownModule()
 
 	FBookMarkToolCommands::Unregister();
 
+	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(BookMarkMainTabName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(BookMarkAssetTabName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(BookMarkFolderTabName);
 	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(BookMarkPositionTabName);
+}
+
+TSharedRef<SDockTab> FBookMarkToolModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+	return SNew(SDockTab)
+		.TabRole(ETabRole::NomadTab)
+		[
+			// Put your tab content here!
+			SAssignNew(BookMarkMain,SBookMarkMain)
+			
+		];
 }
 
 TSharedRef<SDockTab> FBookMarkToolModule::OnSpawnAssetTab(const FSpawnTabArgs& SpawnTabArgs)
@@ -118,6 +136,11 @@ TSharedRef<SDockTab> FBookMarkToolModule::OnSpawnPositionTab(const FSpawnTabArgs
 				SAssignNew(BookMarkPositionTab,SBookMarkPositionTab)
 			]
 		];
+}
+
+void FBookMarkToolModule::PluginButtonClicked()
+{
+	FGlobalTabmanager::Get()->TryInvokeTab(BookMarkMainTabName);
 }
 
 void FBookMarkToolModule::OpenAssetMark() const
@@ -258,6 +281,12 @@ void FBookMarkToolModule::AddFoldPath()
 	{
 		BookMarkAssetTab->RefreshAllListView();
 	}
+
+	if (BookMarkMain)
+	{
+		BookMarkMain->RefreshAllListView();
+	}
+	
 }
 
 void FBookMarkToolModule::AddAssetPath()
@@ -327,6 +356,11 @@ void FBookMarkToolModule::AddAssetPath()
 	{
 		BookMarkAssetTab->RefreshAllListView();
 	}
+
+	if (BookMarkMain)
+	{
+		BookMarkMain->RefreshAllListView();
+	}
 }
 
 void FBookMarkToolModule::RegisterMenus()
@@ -337,14 +371,18 @@ void FBookMarkToolModule::RegisterMenus()
 			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("Settings",LOCTEXT("书签工具", "书签工具"));
 			{
 
-				FToolMenuEntry BookMarkEntry = FToolMenuEntry::InitComboButton(
-					"BookMarkTool",
-					FUIAction(),
-					FOnGetContent::CreateRaw(this,&FBookMarkToolModule::GetDropdown),
-					LOCTEXT("BookMarkTool", "书签工具"),
-					LOCTEXT("BookMarkTool_Tooltip", "书签工具"),
-					FSlateIcon(FBookMarkToolStyle::GetStyleSetName(), "BookMarkTool.OpenBookMarkTool")
-				);
+				FToolMenuEntry& BookMarkEntry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FBookMarkToolCommands::Get().OpenBookMarkTool));
+				BookMarkEntry.SetCommandList(PluginCommands);
+				
+				// FToolMenuEntry BookMarkEntry = FToolMenuEntry::InitComboButton(
+				// 	"BookMarkTool",
+				// 	FUIAction(),
+				// 	FOnGetContent::CreateRaw(this,&FBookMarkToolModule::GetDropdown),
+				// 	LOCTEXT("BookMarkTool", "书签工具"),
+				// 	LOCTEXT("BookMarkTool_Tooltip", "书签工具"),
+				// 	FSlateIcon(FBookMarkToolStyle::GetStyleSetName(), "BookMarkTool.OpenBookMarkTool")
+				// );
+				
 				//这句话一定要加，否则菜单按钮没文字
 				BookMarkEntry.StyleNameOverride = "CalloutToolbar";
 				Section.AddEntry(BookMarkEntry);

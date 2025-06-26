@@ -35,13 +35,16 @@ private:
  * @return 
  */
 	TSharedRef<SWidget> GetDropdown() const;
+	TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs);
 
 	TSharedRef<class SDockTab> OnSpawnAssetTab(const class FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<class SDockTab> OnSpawnFolderTab(const class FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<class SDockTab> OnSpawnPositionTab(const class FSpawnTabArgs& SpawnTabArgs);
+	void PluginButtonClicked();
 
 private:
 	TSharedPtr<class FUICommandList> PluginCommands;
+	TSharedPtr<class SBookMarkMain> BookMarkMain;
 	TSharedPtr<class SBookMarkAssetTab> BookMarkAssetTab;
 	TSharedPtr<class SBookMarkFolderTab> BookMarkFolderTab;
 	TSharedPtr<class SBookMarkPositionTab> BookMarkPositionTab;
