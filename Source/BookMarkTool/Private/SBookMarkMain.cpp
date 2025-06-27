@@ -12,6 +12,7 @@
 #include "IAssetViewport.h"
 #include "IContentBrowserSingleton.h"
 #include "LevelEditor.h"
+#include "LevelEditorViewport.h"
 #include "Selection.h"
 #include "SlateOptMacros.h"
 #include "Framework/Notifications/NotificationManager.h"
@@ -79,7 +80,8 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 					
 					]
 					+ SVerticalBox::Slot()
-					.MinHeight(1000)
+					.MinHeight(600)
+					.MaxHeight(600)
 					.FillHeight(1.0f)
 					.HAlign(HAlign_Fill)
 					.VAlign(VAlign_Fill)
@@ -93,6 +95,29 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 						]
 					]
 				]
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Bottom) // 将按钮固定到底部
+				.Padding(5.0f)
+				[
+					SNew(SBox)
+					.HeightOverride(50.0f)
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Fill)
+					[
+						SNew(SButton)
+						.HAlign(HAlign_Center)
+						.VAlign(VAlign_Center)
+						.OnClicked(this, &SBookMarkMain::AddAssetPath)
+						.ButtonStyle(FAppStyle::Get(),"FlatButton.Success")
+						.Content()
+						[
+							SNew(STextBlock)
+							.Text(FText::FromString(TEXT("添加资产")))
+						]
+					]
+				]
+				
 			]
 
 			//Center
@@ -121,7 +146,8 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 						]
 					]
 					+ SVerticalBox::Slot()
-					.MinHeight(1000)
+					.MinHeight(600)
+					.MaxHeight(600)
 					.FillHeight(1.0f)
 					[
 						SNew(SScrollBox)
@@ -133,6 +159,28 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 						]
 					]
 				]
+				+ SOverlay::Slot()
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Bottom) // 将按钮固定到底部
+					.Padding(5.0f)
+					[
+						SNew(SBox)
+						.HeightOverride(50.0f)
+						.HAlign(HAlign_Fill)
+						.VAlign(VAlign_Fill)
+						[
+							SNew(SButton)
+							.HAlign(HAlign_Center)
+							.VAlign(VAlign_Center)
+							.OnClicked(this, &SBookMarkMain::AddFoldPath)
+							.ButtonStyle(FAppStyle::Get(),"FlatButton.Success")
+							.Content()
+							[
+								SNew(STextBlock)
+								.Text(FText::FromString(TEXT("添加文件夹")))
+							]
+						]
+					]
 			]
 			
 			//Right
@@ -141,7 +189,7 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 				SNew(SOverlay)
 				+SOverlay::Slot()
 				.HAlign(HAlign_Fill)
-				.VAlign(VAlign_Bottom)
+				.VAlign(VAlign_Fill)
 				.Padding(5.0f)
 				[
 					SNew(SVerticalBox)
@@ -169,7 +217,8 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 						]
 					]
 					+ SVerticalBox::Slot()
-					.MinHeight(1000)
+					.MinHeight(600)
+					.MaxHeight(600)
 					.FillHeight(1.0f)
 					[
 						SNew(SScrollBox)
@@ -193,6 +242,7 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 						+ SHorizontalBox::Slot()
 						.HAlign(HAlign_Fill)
 						.VAlign(VAlign_Fill)
+						.FillWidth(2.0f)
 						[
 							SNew(SEditableTextBox)
 						  // .Text(LOCTEXT("DefaultText", "Enter text here..."))  // 设置默认文本
@@ -207,6 +257,7 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 						+ SHorizontalBox::Slot()
 						.HAlign(HAlign_Fill)
 						.VAlign(VAlign_Fill)
+						.FillWidth(1.0f)
 						[
 							SNew(SButton)
 							.HAlign(HAlign_Center)
@@ -219,9 +270,25 @@ void SBookMarkMain::Construct(const FArguments& InArgs)
 								.Text(FText::FromString(TEXT("添加位置")))
 							]
 						]
+						+ SHorizontalBox::Slot()
+						.HAlign(HAlign_Fill)
+						.VAlign(VAlign_Fill)
+						.FillWidth(1.0f)
+						[
+							SNew(SButton)
+							.HAlign(HAlign_Center)
+							.VAlign(VAlign_Center)
+							.OnClicked(this, &SBookMarkMain::AddCameraPostion)
+							.ButtonStyle(FAppStyle::Get(),"FlatButton.Success")
+							.Content()
+							[
+								SNew(STextBlock)
+								.Text(FText::FromString(TEXT("添加相机")))
+							]
+						]
 					]
 					]
-				]
+			]
 		]
 		
 	];
@@ -233,20 +300,22 @@ void SBookMarkMain::RefreshAllListView()
 	{
 		Bookmarks->Modify();
 		bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
-		if (!bSaved)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to save BookMarkDataAsset!"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("BookMarkDataAsset saved successfully!"));
-		}
+		// if (!bSaved)
+		// {
+		// 	UE_LOG(LogTemp, Error, TEXT("Failed to save BookMarkDataAsset!"));
+		// }
+		// else
+		// {
+		// 	UE_LOG(LogTemp, Log, TEXT("BookMarkDataAsset saved successfully!"));
+		// }
 		Bookmarks->ClearGarbage();
-		Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
+		Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, *AssetPath);
 
 		GetStoredData();
 	}
 	
+	AssetListView->RebuildList();
+	FoldPathListView->RebuildList();
 	PositionListView->RebuildList();
 }
 
@@ -529,17 +598,18 @@ void SBookMarkMain::OnPositionRowWidgetClicked(TSharedPtr<FPositionBookmarksCont
 	{
 		FEditorViewportClient& ViewportClient = ActiveViewport->GetAssetViewportClient();
 		FVector TempLocation = ClickedData->WorldPosition.GetLocation();
-
+		FRotator TempRotator = ClickedData->WorldPosition.GetRotation().Rotator();
 		// 计算摄像机位置（稍微后退，避免摄像机卡进模型）
-		FVector CameraOffset = ViewportClient.GetViewRotation().Vector() * -1.0f; // 摄像机朝向的反方向
-		FVector TargetCameraLocation = TempLocation + (CameraOffset * 100 * 2.0f); // 2倍半径距离
+		// FVector CameraOffset = ViewportClient.GetViewRotation().Vector() * -1.0f; // 摄像机朝向的反方向
+		// FVector TargetCameraLocation = TempLocation + (CameraOffset * 100 * 2.0f); // 2倍半径距离
 		
 		// 设置摄像机位置和旋转
-
-		ViewportClient.SetViewLocation(TargetCameraLocation);
+		// ViewportClient.SetViewLocation(TargetCameraLocation);
+		ViewportClient.SetViewLocation(TempLocation);
+		ViewportClient.SetViewRotation(TempRotator);
 
 		// 可选：调整摄像机距离（如稍微后退）
-		ViewportClient.SetViewLocation(TempLocation - ViewportClient.GetViewRotation().Vector() * 300.0f);
+		// ViewportClient.SetViewLocation(TempLocation - ViewportClient.GetViewRotation().Vector() * 300.0f);
         
 		// 刷新视口
 		ViewportClient.Invalidate();
@@ -550,13 +620,13 @@ void SBookMarkMain::OnPositionRowWidgetClicked(TSharedPtr<FPositionBookmarksCont
 void SBookMarkMain::LoadBookMarkDataAsset()
 {
 	//加载资源
-	Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
+	Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, *AssetPath);
 
 	if (Bookmarks == nullptr)
 	{
 		UEditorDialogLibrary::ShowMessage(
 		FText::FromString(TEXT("警告")),
-		FText::FromString(TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset资源不存在")),
+		FText::FromString(*AssetPath.Append("资源不存在")),
 		EAppMsgType::OkCancel
 		);
 		return;
@@ -607,9 +677,18 @@ void SBookMarkMain::GetStoredData()
 			
 		}
 	}
+}
 
-	
-	
+void SBookMarkMain::SaveStoredData()
+{
+	if (Bookmarks.Get())
+	{
+		UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
+		Bookmarks->ClearGarbage();
+		Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, *AssetPath);
+
+		GetStoredData();
+	}
 }
 
 void SBookMarkMain::HandleTextChanged(const FText& InText)
@@ -617,16 +696,141 @@ void SBookMarkMain::HandleTextChanged(const FText& InText)
 	CurrentActorName = InText.ToString();
 }
 
+FReply SBookMarkMain::AddFoldPath()
+{
+	if (!Bookmarks.Get())
+	{
+		LoadBookMarkDataAsset();
+	}
+	
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+
+	// 1. 获取左侧导航树选中的文件夹
+	TArray<FString> NavigationFolders;
+	ContentBrowserModule.Get().GetSelectedPathViewFolders(NavigationFolders);
+
+	// 2. 获取右侧资源面板选中的文件夹
+	TArray<FString> AssetViewFolders;
+	ContentBrowserModule.Get().GetSelectedFolders(AssetViewFolders);
+
+	// 合并结果
+	TArray<FString> AllSelectedFolders;
+	if (AssetViewFolders.Num()>0)
+	{
+		AllSelectedFolders.Append(AssetViewFolders);
+	}
+	else
+	{
+		AllSelectedFolders.Append(NavigationFolders);
+	}
+	
+	if (AllSelectedFolders.Num() > 0)
+	{
+		for (auto Path : AllSelectedFolders)
+		{
+			if (Bookmarks->StorePath.Find(Path))
+			{
+				// Notify user that the bookmark is already in the list
+				FNotificationInfo Info(LOCTEXT("BookmarksAlreadyInList", "Current Path is already in  Bookmarks."));
+				Info.ExpireDuration = 5.0f;
+				FSlateNotificationManager::Get().AddNotification(Info);
+			}
+			Bookmarks->StorePath.Emplace(Path);
+			
+			FString FolderName = FPaths::GetCleanFilename(Path);
+			FFoldPathBookmarksContainer NewFoldPathBookmarksContainer;
+			NewFoldPathBookmarksContainer.Name = FolderName;
+			NewFoldPathBookmarksContainer.Path.Path = Path;
+			if(Bookmarks->FoldPathList.Add(NewFoldPathBookmarksContainer))
+			{
+			
+				// Notify user that the bookmark was added
+				FNotificationInfo Info(LOCTEXT("BookmarksAdded", "Added current Path to  Bookmarks."));
+				Info.ExpireDuration = 5.0f;
+				FSlateNotificationManager::Get().AddNotification(Info);
+			}
+		}
+	}
+
+	// 3. 保存
+	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
+
+	if (!bSaved)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save BookMarkDataAsset!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("BookMarkDataAsset saved successfully!"));
+	}
+	
+	// 刷新界面
+	RefreshAllListView();
+	
+	return FReply::Handled();
+}
+
+FReply SBookMarkMain::AddAssetPath()
+{
+	
+	FContentBrowserModule& ContentBrowserModule = FModuleManager::Get().LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+
+	TArray<FAssetData> SelectedAssets;
+	ContentBrowserModule.Get().GetSelectedAssets(SelectedAssets);
+
+	if (SelectedAssets.Num() > 0)
+	{
+		for (auto Asset : SelectedAssets)
+		{
+			FString AssetName = Asset.AssetName.ToString();
+			FSoftObjectPath AssetSoftPath(Asset.ToSoftObjectPath());
+			if (Bookmarks->StorePath.Find(AssetSoftPath.ToString()))
+			{
+				// Notify user that the bookmark is already in the list
+				FNotificationInfo Info(LOCTEXT("BookmarksAlreadyInList", "Current Path is already in  Bookmarks."));
+				Info.ExpireDuration = 5.0f;
+				FSlateNotificationManager::Get().AddNotification(Info);
+
+			}
+			Bookmarks->StorePath.Emplace(AssetSoftPath.ToString());
+			
+			FAssetBookmarksContainer NewAssetBookmarksContainer;
+			NewAssetBookmarksContainer.Name = AssetName;
+			NewAssetBookmarksContainer.Path = AssetSoftPath;
+			
+			if(Bookmarks->AssetList.Add(NewAssetBookmarksContainer))
+			{
+				// Notify user that the bookmark was added
+				FNotificationInfo Info(LOCTEXT("BookmarksAdded", "Added current Asset to  Bookmarks."));
+				Info.ExpireDuration = 5.0f;
+				FSlateNotificationManager::Get().AddNotification(Info);
+			}
+		}
+	}
+
+	// 3. 保存
+	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
+
+	if (!bSaved)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save BookMarkDataAsset!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("BookMarkDataAsset saved successfully!"));
+	}
+	
+	// 刷新界面
+	RefreshAllListView();
+	
+	return FReply::Handled();
+}
+
+
+
 FReply SBookMarkMain::AddPostion()
 {
-	if (Bookmarks.Get())
-	{
-		UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
-		Bookmarks->ClearGarbage();
-		Bookmarks = LoadObject<UBookMarkDataAsset>(nullptr, TEXT("/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset"));
-
-		GetStoredData();
-	}
+	SaveStoredData();
 	if (UWorld* World = GEditor->GetEditorWorldContext().World())
 	{
 		USelection* SelectedActors = GEditor->GetSelectedActors();
@@ -653,6 +857,59 @@ FReply SBookMarkMain::AddPostion()
 				FSlateNotificationManager::Get().AddNotification(Info);
 			}
 		}
+		
+	}
+
+	// 3. 保存
+	bool bSaved = UEditorAssetLibrary::SaveLoadedAsset(Bookmarks.Get());
+
+	if (!bSaved)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to save BookMarkDataAsset!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("BookMarkDataAsset saved successfully!"));
+	}
+
+	// 刷新界面
+	RefreshAllListView();
+	
+	return FReply::Handled();
+}
+
+FReply SBookMarkMain::AddCameraPostion()
+{
+	SaveStoredData();
+	if (UWorld* World = GEditor->GetEditorWorldContext().World())
+	{
+		
+		FPositionBookmarksContainer PositionBookmarksContainer;
+		if (CurrentActorName != "")
+		{
+			PositionBookmarksContainer.Name = CurrentActorName;
+		}
+		else
+		{
+			PositionBookmarksContainer.Name =  TEXT("Camera");
+		}
+		// 改为获取视口摄像机位置：
+		if (GCurrentLevelEditingViewportClient)
+		{
+			FVector CameraLocation = GCurrentLevelEditingViewportClient->GetViewLocation();
+			FRotator CameraRotation = GCurrentLevelEditingViewportClient->GetViewRotation();
+			PositionBookmarksContainer.WorldPosition = FTransform(CameraRotation, CameraLocation);
+		}
+		PositionBookmarksContainer.MapPath = World->GetOuter()->GetPathName();
+
+		if(Bookmarks->PositionList.Add(PositionBookmarksContainer))
+		{
+			// Notify user that the bookmark was added
+			FNotificationInfo Info(LOCTEXT("BookMarkPositionTab", "Added current Postion to  Bookmarks."));
+			Info.ExpireDuration = 5.0f;
+			FSlateNotificationManager::Get().AddNotification(Info);
+		}
+		
 		
 	}
 

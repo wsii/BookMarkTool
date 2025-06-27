@@ -62,12 +62,19 @@ private:
 	void OnPositionRowWidgetClicked(TSharedPtr<FPositionBookmarksContainer> ClickedData);
 	
 	void GetStoredData();
-
+	void SaveStoredData();
+	
 	FText CurrentText;
 	FString CurrentActorName;
+	FString AssetPath =  TEXT("/Game/Developers/"+FString(FPlatformProcess::UserName()).ToLower()+"/BookMarkTool/BookMarkDataAsset.BookMarkDataAsset");
 	
 	void HandleTextChanged(const FText& InText);
+
+	FReply AddFoldPath();
+	FReply AddAssetPath();
+	
 	FReply AddPostion();
+	FReply AddCameraPostion();
 	
 	FReply OpenSettingDataAsset();
 	
