@@ -188,7 +188,7 @@ void FBookMarkToolModule::RegisterMenus()
 		{
 			FToolMenuSection& Section = Menu->FindOrAddSection("BookMarkTool",
 											 LOCTEXT("UPTool", "BookMarkTool"),
-											 FToolMenuInsert(NAME_None, EToolMenuInsertType::First));
+											 FToolMenuInsert(NAME_None, EToolMenuInsertType::Default));
 	
 			Section.AddMenuEntryWithCommandList(FBookMarkToolCommands::Get().OpenBookMarkTool, PluginCommands);
 	
@@ -211,7 +211,7 @@ void FBookMarkToolModule::RegisterMenus()
 		{
 			FToolMenuSection& Section = Menu->FindOrAddSection("BookMarkTool",
 								 LOCTEXT("UPTool", "BookMarkTool"),
-								 FToolMenuInsert(NAME_None, EToolMenuInsertType::First));
+								 FToolMenuInsert(NAME_None, EToolMenuInsertType::Default));
 			Section.AddMenuEntryWithCommandList(FBookMarkToolCommands::Get().OpenBookMarkTool, PluginCommands);
 		}
 	}
